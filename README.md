@@ -1,4 +1,4 @@
-# CLI Chat application
+# pingX
 
 ### This is a simple chat application based entirely on the command line interface.
 
