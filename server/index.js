@@ -40,7 +40,7 @@ io.on('connection', socket => {
 
 	socket.on('new message', data => {
 		socket.broadcast.emit('new message', data);
-		console.log(data);
+		console.log(`${data.timeStamp} ${data.username}: ${data.message}`);
 	});
 });
 
