@@ -2,7 +2,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import http from 'http';
 // import { v4 as uuidv4 } from 'uuid';
+import cors from 'cors';
 import { Server } from 'socket.io';
+
 let users = 0;
 
 // env variables from .env file
@@ -12,7 +14,15 @@ const port = process.env.PORT || 5500;
 // initializing server and socket.io
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+	cors: {
+		origin: '*',
+		methods: ['GET', 'POST'],
+	},
+});
+
+// safeguarding against CORS
+app.use(cors());
 
 // setting the static folder
 app.use(express.static('web-client/build/'));
