@@ -7,7 +7,7 @@ function App() {
 	const [socket, setSocket] = useState(null);
 
 	useEffect(() => {
-		const newSocket = io('http://localhost:3000');
+		const newSocket = io('http://localhost:5500');
 		setSocket(newSocket);
 		return () => {
 			newSocket.close();
@@ -47,7 +47,12 @@ function App() {
 						});
 					}}
 				>
-					<input type='text' name='username' placeholder='Username' />
+					<input
+						type='text'
+						name='username'
+						placeholder='Username'
+						className='mx-10'
+					/>
 					<input type='text' name='message' placeholder='Message' />
 					<button type='submit'>Send</button>
 				</form>
