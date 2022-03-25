@@ -1,8 +1,11 @@
 import React from 'react';
 
-function InputField({ name, value, setValue }) {
+function InputField({ name, value, setValue, className }) {
 	return (
-		<label htmlFor={name} className='text-def-bg relative'>
+		<label
+			htmlFor={name}
+			className={`text-def-bg text-sm md:text-lg relative ${className}`}
+		>
 			<input
 				type='text'
 				value={value}
