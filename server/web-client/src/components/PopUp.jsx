@@ -1,12 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function PopUp({ show, setShow, popupContent }) {
+	const [head, setHead] = useState(popupContent.head);
+	const [message, setMessage] = useState(popupContent.message);
+
 	useEffect(() => {
 		let t;
 		if (show) t = setTimeout(() => setShow(false), 2500);
 
 		return () => clearTimeout(t);
 	}, [show, setShow]);
+
+	useEffect(() => {
+		if (show) {
+			setShow(false);
+			setTimeout(() => {
+				setShow(true);
+				setHead(popupContent.head);
+				setMessage(popupContent.message);
+			}, 300);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [popupContent, setShow]);
 
 	return (
 		<div className='flex justify-center items-center w-full ring-2'>
@@ -16,10 +31,10 @@ export default function PopUp({ show, setShow, popupContent }) {
 				}`}
 			>
 				<h2 className='font-mono font-bold text-sky-600 text-lg md:text-xl'>
-					{popupContent.head}
+					{head}
 				</h2>
 				<p className='text-sm md:text-base max-w-sm mt-2 text-gray-600'>
-					{popupContent.message}
+					{message}
 				</p>
 			</div>
 		</div>

@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 
 import Button from './Button.jsx';
 import InputField from './InputField.jsx';
+import { SetUsername, SetRoomID, GetNewRoomID } from '../util/Server.js';
 
-export default function WelcomeScreen({ toggleLoading, showError }) {
+export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 	const [username, setUsername] = useState('');
 	const [roomID, setRoomID] = useState('');
 	const [crtBtnHeight, setCrtBtnHeight] = useState('scale-y-100');
@@ -14,14 +15,64 @@ export default function WelcomeScreen({ toggleLoading, showError }) {
 			setTimeout(() => setJoining(true), 125);
 			return;
 		}
-		// Handle the logic of checking if the room ID format is correct, display error accordingly if not
-		// If the room ID format is correct, make a request to the server to check if the username doesnt clash. Show error message if clash.
+
+		// Validation Logic
+		if (roomID.length === 0) {
+			showError({
+				head: 'Error',
+				message: 'Please enter a room ID.',
+			});
+			return;
+		}
+
+		if (roomID.length !== 4) {
+			showError({
+				head: 'Error',
+				message: 'Room ID must be a 4 character string.\nTry again.',
+			});
+			return;
+		}
+
+		if (username.length === 0) {
+			showError({
+				head: 'Error',
+				message: 'Please enter a username.',
+			});
+			return;
+		}
+		// make a request to the server to check if the username doesnt clash. Show error message if clash.
 		// If no clash, just switch to the /chat route and join the room
+		toggleLoading(true);
+		SetUsername(username);
+		roomID.toLowerCase();
+		SetRoomID(roomID);
+
+		setTimeout(() => {
+			toggleLoading(false);
+			setMode('Chat');
+		});
 	};
 
-	const handleCreateOnClick = () => {
+	const handleCreateOnClick = async () => {
+		// Validation Logic
+		if (username.length === 0) {
+			showError({
+				head: 'Error',
+				message: 'Please enter a username.',
+			});
+			return;
+		}
 		// make a GET request to the server to create a new room, grab the new ID, then switch to the /chat route and join the room.
-		showError({ head: 'Bruh', message: 'Bruh' });
+		toggleLoading(true);
+		SetUsername(username);
+		const id = await GetNewRoomID();
+		SetRoomID(id);
+		console.log(id);
+
+		setTimeout(() => {
+			toggleLoading(false);
+			setMode('Chat');
+		});
 	};
 
 	return (
@@ -33,7 +84,7 @@ export default function WelcomeScreen({ toggleLoading, showError }) {
 			/>
 			{joining || (
 				<Button className={crtBtnHeight} onClick={handleCreateOnClick}>
-					Create Room
+					create room
 				</Button>
 			)}
 			{joining && (
@@ -43,7 +94,7 @@ export default function WelcomeScreen({ toggleLoading, showError }) {
 					setValue={setRoomID}
 				/>
 			)}
-			<Button onClick={handleJoinOnClick}>Join Room</Button>
+			<Button onClick={handleJoinOnClick}>join room</Button>
 		</div>
 	);
 }
