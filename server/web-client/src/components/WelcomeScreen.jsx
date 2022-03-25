@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Button from './Button.jsx';
 import InputField from './InputField.jsx';
 
-export default function WelcomeScreen() {
+export default function WelcomeScreen({ toggleLoading, showError }) {
 	const [username, setUsername] = useState('');
 	const [roomID, setRoomID] = useState('');
 	const [crtBtnHeight, setCrtBtnHeight] = useState('scale-y-100');
@@ -21,6 +21,7 @@ export default function WelcomeScreen() {
 
 	const handleCreateOnClick = () => {
 		// make a GET request to the server to create a new room, grab the new ID, then switch to the /chat route and join the room.
+		showError({ head: 'Bruh', message: 'Bruh' });
 	};
 
 	return (
