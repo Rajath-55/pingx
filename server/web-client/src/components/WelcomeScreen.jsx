@@ -50,7 +50,7 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 		setTimeout(() => {
 			toggleLoading(false);
 			setMode('Chat');
-		});
+		}, 1000);
 	};
 
 	const handleCreateOnClick = async () => {
@@ -72,7 +72,7 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 		setTimeout(() => {
 			toggleLoading(false);
 			setMode('Chat');
-		});
+		}, 1000);
 	};
 
 	return (
