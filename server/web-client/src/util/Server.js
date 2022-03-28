@@ -29,6 +29,18 @@ const sendMessage = message => {
 	});
 };
 
+// get room ID from server
+
+// join server with room ID and username
+
+// handle connection
+
+// send message to server
+
+// receive message from server
+
+// handle disconnecting user
+
 export {
 	GetRoomID,
 	GetNewRoomID,
