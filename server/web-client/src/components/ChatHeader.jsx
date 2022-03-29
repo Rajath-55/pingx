@@ -1,7 +1,11 @@
-import React from 'react';
-import UsersIcon from '../assets/users.svg';
+import React, { useContext } from 'react';
 
-export function ChatHeader({ roomID, usersOnline }) {
+import UsersIcon from '../assets/users.svg';
+import { ServerContext } from '../contexts/ServerContext.js';
+
+export default function ChatHeader() {
+	const { roomID, usersOnline } = useContext(ServerContext);
+
 	return (
 		<div className='flex justify-between w-full'>
 			<h3 className='font-bold text-xl'>{`#${roomID}`}</h3>
