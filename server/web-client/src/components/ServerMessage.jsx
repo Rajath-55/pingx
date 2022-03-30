@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function ServerMessage({ username, message, timeStamp }) {
 	return (
-		<div className=''>
+		<div className='message'>
 			<div className={`flex-1 text-center`}>
 				<p className='text-sm font-semibold'>server</p>
 			</div>

@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
-import { GetUsername } from '../util/Server.js';
+import { ServerContext } from '../contexts/ServerContext.js';
 import OtherMessage from './OtherMessage.jsx';
 import SelfMessage from './SelfMessage.jsx';
 import ServerMessage from './ServerMessage.jsx';
 
 export default function Message({ username, message, timeStamp }) {
-	const currentUsername = GetUsername();
+	const ctx = useContext(ServerContext);
 
-	if (username === currentUsername)
+	if (username === ctx.username)
 		return (
 			<SelfMessage
 				username={username}

@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function SelfMessage({ username, message, timeStamp }) {
 	return (
-		<div className=''>
+		<div className='message'>
 			<div className={`flex-1 text-right`}>
 				<p className='text-sm font-semibold'>{username}</p>
 			</div>

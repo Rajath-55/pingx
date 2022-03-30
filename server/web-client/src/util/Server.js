@@ -1,52 +1,63 @@
-let username = '';
-let roomID = '';
-let socket = '';
-
-const GetRoomID = () => roomID;
-const SetRoomID = id => (roomID = id);
-const SetUsername = name => (username = name);
-const GetUsername = () => username;
-const SetSocket = skt => (socket = skt);
+const CloseSocket = socket => socket.close();
 
 const getTimeStamp = () =>
 	`${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
 
-// temp workaround
-const GetNewRoomID = async () => {
-	const letters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-	let roomID = '';
-	for (let i = 0; i < 4; i++)
-		roomID += letters[Math.floor(Math.random() * letters.length)];
-
-	return roomID;
-};
-
-const sendMessage = message => {
-	socket?.emit('new message', {
-		username,
-		message,
-		timeStamp: getTimeStamp(),
-	});
+// get the server URL, which is hosted at same link just PORT 5500
+// need to change this to accomodate dev and prod environments and pick the URL accordingly
+const getServerURL = () => {
+	const x = window.location.href.split(':');
+	x[x.length - 1] = '5500';
+	return x.join(':');
 };
 
 // get room ID from server
+// temp workaround
+const GetNewRoomID = async () => {
+	const response = await fetch(`${getServerURL()}/create`);
+	const data = await response.json();
+	return data.roomID;
+};
 
 // join server with room ID and username
-
-// handle connection
+const JoinRoom = async (socket, roomID, username) => {
+	socket.emit('join-room', {
+		username,
+		roomID,
+	});
+};
 
 // send message to server
+const sendMessage = (socket, username, message, messages, setMessages) => {
+	const newMessages = [...messages];
+	const data = {
+		username,
+		message,
+		timeStamp: getTimeStamp(),
+	};
+	newMessages.push(data);
+	setMessages(newMessages);
+	socket.emit('send-message', data);
+};
 
 // receive message from server
-
-// handle disconnecting user
+const ReceiveMessage = (socket, messages, setMessages) => {
+	socket.on('receive-message', data => {
+		// console.log('receiving messages');
+		setMessages(messages => {
+			const newMessages = [...messages];
+			newMessages.push(data);
+			return newMessages;
+		});
+	});
+};
 
 export {
-	GetRoomID,
 	GetNewRoomID,
-	SetRoomID,
-	GetUsername,
-	SetUsername,
-	SetSocket,
+	CloseSocket,
+	JoinRoom,
 	sendMessage,
+	ReceiveMessage,
+	getTimeStamp,
+	getServerURL,
 };

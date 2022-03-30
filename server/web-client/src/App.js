@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import io from 'socket.io-client';
 
 import Header from './components/Header.jsx';
@@ -7,15 +7,16 @@ import WelcomeScreen from './components/WelcomeScreen';
 import ChatScreen from './components/ChatScreen';
 import Loading from './components/Loading';
 import PopUp from './components/PopUp.jsx';
+import { ServerContext } from './contexts/ServerContext.js';
+import { CloseSocket, getServerURL } from './util/Server';
 
 function App() {
-	const [socket, setSocket] = useState(null);
+	// state variables and helper functions for controlling the broader UI elements
 	const [loading, setLoading] = useState(false);
 	const [popup, setPopup] = useState(false);
 	const [popupContent, setPopupContent] = useState({
-		message:
-			'There was an error while trying to reach the server. Please try again later.',
-		head: 'Error',
+		message: '',
+		head: '',
 	});
 	const [mode, setMode] = useState('Welcome');
 	const showError = ({ message, head }) => {
@@ -27,45 +28,21 @@ function App() {
 		else setLoading(option);
 	};
 
-	// eslint-disable-next-line no-lone-blocks
-	{
-		// useEffect(() => {
-		// 	const newSocket = io('http://localhost:5500');
-		// 	setSocket(newSocket);
-		// 	return () => {
-		// 		newSocket.close();
-		// 	};
-		// }, [setSocket]);
-		// if (socket) {
-		// 	socket.on('new user', data => {
-		// 		console.log(
-		// 			`A new user has joined the chat.\nThere are now ${data.usersInRoom} users in the chat.`,
-		// 		);
-		// 	});
-		// 	socket.on('new message', data => {
-		// 		console.log(`${data.timeStamp} ${data.username}: ${data.message}`);
-		// 	});
-		// 	socket.on('disconnected', data => {
-		// 		console.log(
-		// 			`A user has left the chat.\nThere are now ${data.usersInRoom} users in the chat.`,
-		// 		);
-		// 	});
-		// }
-	}
-	const [messages, setMessages] = useState([
-		{ username: 'abcd', message: 'Hello', timeStamp: '12:00:00' },
-		{ username: 'abcd', message: 'Hello', timeStamp: '12:00:00' },
-		{ username: 'xyz', message: 'fuck you', timeStamp: '13:00:00' },
-		// { username: 'abcd', message: 'Hello', timeStamp: '12:00:00' },
-		// { username: 'abcd', message: 'Hello', timeStamp: '12:00:00' },
-		{ username: 'SERVER', message: 'and your mom.', timeStamp: '14:00:00' },
-		{ username: 'abcd', message: 'Hello', timeStamp: '12:00:00' },
-		{ username: 'SERVER', message: 'and your mom.', timeStamp: '14:00:00' },
-		{ username: 'abcd', message: 'Hello', timeStamp: '12:00:00' },
-		{ username: 'xyz', message: 'fuck you', timeStamp: '13:00:00' },
-		{ username: 'abcd', message: 'Hello', timeStamp: '12:00:00' },
-	]);
-	const [usersOnline, setUsersOnline] = useState(3);
+	const { socket, setSocket, setMessages } = useContext(ServerContext);
+
+	// as the app loads, connect to the server
+	useEffect(() => {
+		const newSocket = io(getServerURL());
+		setSocket(newSocket);
+	}, [setMessages, setSocket]);
+
+	// as the socket is obtained, set up a callback to close the socket when the app closes
+	useEffect(() => {
+		return () => {
+			CloseSocket(socket);
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return (
 		<div className='relative font-mono '>
@@ -88,8 +65,6 @@ function App() {
 						toggleLoading={toggleLoading}
 						showError={showError}
 						setMode={setMode}
-						messages={messages}
-						usersOnline={usersOnline}
 					/>
 				)}
 			</div>

@@ -5,7 +5,7 @@ import http from 'http';
 import cors from 'cors';
 import { Server } from 'socket.io';
 
-let users = 0;
+import Rooms from './src/Rooms.js';
 
 // env variables from .env file
 dotenv.config();
@@ -24,23 +24,53 @@ const io = new Server(server, {
 // safeguarding against CORS
 app.use(cors());
 
-// setting the static folder
+// setting the static build folder
 app.use(express.static('web-client/build/'));
+
+const rooms = new Rooms();
+
+// when a user makes a request to create a new room
+app.get('/create', (req, res) => {
+	const ID = rooms.makeNewRoom();
+	console.log('created a new room with ID - ' + ID);
+	res.send({ roomID: ID });
+});
+
+const getTimeStamp = () =>
+	`${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
 
 // setting the socket handlers
 io.on('connection', socket => {
 	console.log('a new user has connected.');
 
-	socket.broadcast.emit('new user', { usersInRoom: users++ });
+	socket.on('join-room', data => {
+		const { username, roomID } = data;
 
-	socket.on('disconnect', () => {
-		socket.emit('disconnected', { usersInRoom: users-- });
-		console.log('a user has disconnected.');
-	});
+		socket.join(roomID);
 
-	socket.on('new message', data => {
-		socket.broadcast.emit('new message', data);
-		console.log(`${data.timeStamp} ${data.username}: ${data.message}`);
+		console.log(`${username} has joined the room ${roomID}`);
+		const dt = {
+			username: 'SERVER',
+			message: `${username} has joined the room.`,
+			timeStamp: getTimeStamp(),
+		};
+		socket.to(roomID).emit('receive-message', dt);
+
+		socket.on('send-message', data => {
+			socket.to(roomID).emit('receive-message', data);
+			console.log(
+				`${roomID}\n\t${data.timeStamp} ${data.username}: ${data.message}`,
+			);
+		});
+
+		socket.on('disconnect', () => {
+			socket.to(roomID).emit('receive-message', {
+				username: 'SERVER',
+				message: `${username} has left the room.`,
+				timeStamp: getTimeStamp(),
+			});
+			socket.leave(roomID);
+		});
 	});
 });
 
