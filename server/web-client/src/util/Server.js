@@ -3,16 +3,31 @@ const CloseSocket = socket => socket.close();
 const getTimeStamp = () =>
 	`${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
 
-// temp workaround
-const GetNewRoomID = async () => {
-	const letters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-	let roomID = '';
-	for (let i = 0; i < 4; i++)
-		roomID += letters[Math.floor(Math.random() * letters.length)];
-
-	return roomID;
+// get the server URL, which is hosted at same link just PORT 5500
+// need to change this to accomodate dev and prod environments and pick the URL accordingly
+const getServerURL = () => {
+	const x = window.location.href.split(':');
+	x[x.length - 1] = '5500';
+	return x.join(':');
 };
 
+// get room ID from server
+// temp workaround
+const GetNewRoomID = async () => {
+	const response = await fetch(`${getServerURL()}/create`);
+	const data = await response.json();
+	return data.roomID;
+};
+
+// join server with room ID and username
+const JoinRoom = async (socket, roomID, username) => {
+	socket.emit('join-room', {
+		username,
+		roomID,
+	});
+};
+
+// send message to server
 const sendMessage = (socket, username, message, messages, setMessages) => {
 	const newMessages = [...messages];
 	const data = {
@@ -25,30 +40,10 @@ const sendMessage = (socket, username, message, messages, setMessages) => {
 	socket.emit('send-message', data);
 };
 
-// get room ID from server
-
-// join server with room ID and username
-const JoinRoom = async (socket, roomID, username) => {
-	socket.emit('join-room', {
-		username,
-		roomID,
-	});
-};
-
-// handle connection
-
-// send message to server
-
 // receive message from server
 const ReceiveMessage = (socket, messages, setMessages) => {
 	socket.on('receive-message', data => {
-		console.log('receiving messages');
-		// const newMessages = [...messages, data];
-		// const newMessages = messages.slice();
-		// // console.log(newMessages);
-		// newMessages.push(data);
-		// // console.log(newMessages);
-		// setMessages(newMessages);
+		// console.log('receiving messages');
 		setMessages(messages => {
 			const newMessages = [...messages];
 			newMessages.push(data);
@@ -57,8 +52,6 @@ const ReceiveMessage = (socket, messages, setMessages) => {
 	});
 };
 
-// handle disconnecting user
-
 export {
 	GetNewRoomID,
 	CloseSocket,
@@ -66,4 +59,5 @@ export {
 	sendMessage,
 	ReceiveMessage,
 	getTimeStamp,
+	getServerURL,
 };

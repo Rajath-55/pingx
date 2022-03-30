@@ -8,8 +8,11 @@ import { ServerContext } from '../contexts/ServerContext.js';
 
 export default function ChatScreen({ showError, toggleLoading, setMode }) {
 	const { socket, messages, setMessages } = useContext(ServerContext);
+
+	// registering the callback to receive messages from the server
 	useEffect(() => {
 		ReceiveMessage(socket, messages, setMessages);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

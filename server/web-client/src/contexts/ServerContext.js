@@ -17,6 +17,19 @@ const ServerProvider = ({ children }) => {
 	]);
 	const [usersOnline, setUsersOnline] = useState(0);
 
+	const resetAll = () => {
+		setUsername('');
+		setRoomID('');
+		setMessages([
+			{
+				username: 'SERVER',
+				message: 'You are connected to the Server.',
+				timeStamp: getTimeStamp(),
+			},
+		]);
+		setUsersOnline(0);
+	};
+
 	return (
 		<ServerContext.Provider
 			value={{
@@ -30,6 +43,7 @@ const ServerProvider = ({ children }) => {
 				setMessages,
 				usersOnline,
 				setUsersOnline,
+				resetAll,
 			}}
 		>
 			{children}

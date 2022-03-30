@@ -8,9 +8,10 @@ import ChatScreen from './components/ChatScreen';
 import Loading from './components/Loading';
 import PopUp from './components/PopUp.jsx';
 import { ServerContext } from './contexts/ServerContext.js';
-import { CloseSocket, ReceiveMessage } from './util/Server';
+import { CloseSocket, getServerURL } from './util/Server';
 
 function App() {
+	// state variables and helper functions for controlling the broader UI elements
 	const [loading, setLoading] = useState(false);
 	const [popup, setPopup] = useState(false);
 	const [popupContent, setPopupContent] = useState({
@@ -27,17 +28,15 @@ function App() {
 		else setLoading(option);
 	};
 
-	const { socket, setSocket, messages, setMessages, usersOnline } =
-		useContext(ServerContext);
+	const { socket, setSocket, setMessages } = useContext(ServerContext);
 
+	// as the app loads, connect to the server
 	useEffect(() => {
-		// const x = window.location.href.split(':');
-		// x[x.length - 1] = '5500';
-		// x.join(':');
-		const newSocket = io('http://localhost:5500/');
+		const newSocket = io(getServerURL());
 		setSocket(newSocket);
 	}, [setMessages, setSocket]);
 
+	// as the socket is obtained, set up a callback to close the socket when the app closes
 	useEffect(() => {
 		return () => {
 			CloseSocket(socket);
