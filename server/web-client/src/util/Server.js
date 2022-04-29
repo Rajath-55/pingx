@@ -6,12 +6,12 @@ const getTimeStamp = () =>
 // get the server URL, which is hosted at same link just PORT 5500
 // need to change this to accomodate dev and prod environments and pick the URL accordingly
 const getServerURL = () => {
-	if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-		const x = window.location.href.split(':');
-		x[x.length - 1] = '5500';
-		return x.join(':');
-	}
-	return 'https://pingx.vercel.app';
+	// if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+	const x = window.location.href.split(':');
+	x[x.length - 1] = '5500';
+	return x.join(':');
+	// }
+	// return 'https://pingx.vercel.app';
 };
 
 // get room ID from server
