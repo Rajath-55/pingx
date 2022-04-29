@@ -28,7 +28,7 @@ const io = new Server(server, {
 app.use(cors());
 
 // setting the static build folder
-app.use('/public', express.static(dirPath));
+app.use('/', express.static(dirPath));
 
 const rooms = new Rooms();
 
