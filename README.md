@@ -1,4 +1,4 @@
-# pingxg
+# pingx
 
 A full-stack text-based chat application accessible from the command-line.
 
