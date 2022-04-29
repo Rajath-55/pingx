@@ -24,9 +24,7 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 				setJoining(true);
 				roomIDInputRef.current?.focus();
 				const clipboardData = await readFromClipboard();
-				const pattern =
-					/[a-z|A-Z|0-9][a-z|A-Z|0-9][a-z|A-Z|0-9][a-z|A-Z|0-9]/;
-				// console.log(clipboardData);
+				const pattern = /^([a-zA-Z0-9]){4}$/; // console.log(clipboardData);
 				if (pattern.test(clipboardData)) setRoomIDInput(clipboardData);
 			}, 125);
 			return;
@@ -48,7 +46,7 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 			toggleLoading(false);
 			setMode('Chat');
 		} catch (e) {
-			showError({ head: 'error in joining the room.', message: e });
+			showError({ head: 'error in joining the room', message: e });
 			toggleLoading(false);
 		}
 	};
