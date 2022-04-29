@@ -1,10 +1,10 @@
 class User {
-	constructor(socketID, username, roomID) {
-		this.socketID = socketID;
+	constructor(username, roomID) {
+		// this.socketID = socketID;
 		this.username = username;
 		this.roomID = roomID;
 		this.addedOn = new Date();
-		this.colour = setColour();
+		this.colour = this.setColour();
 	}
 
 	getUsername() {

@@ -52,13 +52,23 @@ io.on('connection', socket => {
 		// check if the room exists or not
 		if (!rooms.getRoom(roomID)) {
 			console.log(`room #${roomID} does not exist`);
-			socket.emit('room-does-not-exist');
+			socket.emit('room-join-failure', `room #${roomID} does not exist.`);
 			return;
 		}
 
+		// check if the user is already in the room
+		if (rooms.getRoom(roomID).hasUser(username)) {
+			console.log(`user ${username} is already in room #${roomID}`);
+			socket.emit(
+				'room-join-failure',
+				`@${username} is already taken in #${roomID}. \nplease try again with a different username.`,
+			);
+			return;
+		}
 		// join the room
+		rooms.getRoom(roomID).addUser(username);
 		socket.join(roomID);
-		socket.emit('room-joined');
+		socket.emit('room-join-success');
 
 		console.log(`${username} has joined the room ${roomID}`);
 		const dt = {

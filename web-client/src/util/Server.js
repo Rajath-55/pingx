@@ -34,11 +34,11 @@ const JoinRoom = (socket, roomID, username) => {
 			reject('server took too long to respond.');
 		}, 7777);
 		// if the server sends back a room does not exist prompt, then reject
-		socket.on('room-does-not-exist', () => {
-			reject(`room #${roomID} does not exist.`);
+		socket.on('room-join-failure', data => {
+			reject(data);
 		});
 		// if the server sends back a room exists prompt, then resolve
-		socket.on('room-joined', () => {
+		socket.on('room-join-success', () => {
 			resolve('room successfully joined.');
 		});
 	});
