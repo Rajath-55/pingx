@@ -5,6 +5,7 @@ import InputField from './InputField.jsx';
 import { JoinRoom, GetNewRoomID } from '../util/Server.js';
 import { ServerContext } from '../contexts/ServerContext.js';
 import { roomIDValidation, usernameValidation } from '../util/Validation.js';
+import { writeToClipboard, readFromClipboard } from '../util/General.js';
 
 export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 	// state variables for the form
@@ -19,9 +20,12 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 	const handleJoinOnClick = async () => {
 		if (!joining) {
 			setCrtBtnHeight('scale-y-0');
-			setTimeout(() => {
+			setTimeout(async () => {
 				setJoining(true);
 				roomIDInputRef.current?.focus();
+				const clipboardData = await readFromClipboard();
+				const pattern = /^([a-zA-Z0-9]){4}$/; // console.log(clipboardData);
+				if (pattern.test(clipboardData)) setRoomIDInput(clipboardData);
 			}, 125);
 			return;
 		}
@@ -42,7 +46,7 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 			toggleLoading(false);
 			setMode('Chat');
 		} catch (e) {
-			showError({ head: 'error in joining the room.', message: e });
+			showError({ head: 'error in joining the room', message: e });
 			toggleLoading(false);
 		}
 	};
@@ -57,26 +61,22 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 		const id = await GetNewRoomID();
 		setRoomID(id);
 		console.log(id);
-		// Write the new roomID to clipboard
-		const type = 'text/plain';
-		const blob = new Blob([id], { type });
-		const data = [new window.ClipboardItem({ [type]: blob })];
-		navigator.clipboard.write(data).then(() => {
-			showError({
-				head: `new room created`,
-				message: (
-					<span>
-						ID: <span className='font-bold text-lg'>#{id}</span>
-						<br />
-						copied to clipboard.
-						<br />
-						share it with others for them to join.
-					</span>
-				),
-			});
-		});
 
+		await writeToClipboard(id);
 		await JoinRoom(socket, id, usernameInput);
+
+		showError({
+			head: `new room created`,
+			message: (
+				<span>
+					ID: <span className='font-bold text-lg'>#{id}</span>
+					<br />
+					copied to clipboard.
+					<br />
+					share it with others for them to join.
+				</span>
+			),
+		});
 		toggleLoading(false);
 		setMode('Chat');
 	};
