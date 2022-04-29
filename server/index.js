@@ -46,7 +46,16 @@ io.on('connection', socket => {
 	socket.on('join-room', data => {
 		const { username, roomID } = data;
 
+		// check if the room exists or not
+		if (!rooms.getRoom(roomID)) {
+			console.log('room does not exist');
+			socket.emit('room-does-not-exist');
+			return;
+		}
+
+		// join the room
 		socket.join(roomID);
+		socket.emit('room-joined');
 
 		console.log(`${username} has joined the room ${roomID}`);
 		const dt = {
@@ -59,7 +68,7 @@ io.on('connection', socket => {
 		socket.on('send-message', data => {
 			socket.to(roomID).emit('receive-message', data);
 			console.log(
-				`${roomID}\n\t${data.timeStamp} ${data.username}: ${data.message}`,
+				`${roomID}\n\t| ${data.timeStamp} | ${data.username}: ${data.message}`,
 			);
 		});
 

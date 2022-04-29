@@ -21,6 +21,7 @@ class User {
 
 	setColour() {
 		// do something with this.username to set some "unique" light-shade colour into this.colour
+		this.colour = '#FFF';
 	}
 }
 
