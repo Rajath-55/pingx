@@ -4,12 +4,15 @@ import http from 'http';
 // import { v4 as uuidv4 } from 'uuid';
 import cors from 'cors';
 import { Server } from 'socket.io';
+import path from 'path';
 
 import Rooms from './src/Rooms.js';
 
 // env variables from .env file
 dotenv.config();
 const port = process.env.PORT || 5500;
+const __dirname = path.resolve();
+const dirPath = path.join(__dirname, 'public');
 
 // initializing server and socket.io
 const app = express();
@@ -25,7 +28,7 @@ const io = new Server(server, {
 app.use(cors());
 
 // setting the static build folder
-app.use(express.static('public'));
+app.use('/public', express.static(dirPath));
 
 const rooms = new Rooms();
 
