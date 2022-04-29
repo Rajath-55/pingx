@@ -37,9 +37,14 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 		roomIDInput.toLowerCase();
 		setRoomID(roomIDInput);
 
-		await JoinRoom(socket, roomIDInput, usernameInput);
-		toggleLoading(false);
-		setMode('Chat');
+		try {
+			await JoinRoom(socket, roomIDInput, usernameInput);
+			toggleLoading(false);
+			setMode('Chat');
+		} catch (e) {
+			showError({ head: 'error in joining the room.', message: e });
+			toggleLoading(false);
+		}
 	};
 
 	const handleCreateOnClick = async () => {
@@ -86,6 +91,11 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 				name='username'
 				value={usernameInput}
 				setValue={setUsernameInput}
+				onKeyDown={e => {
+					if (e.key === 'Enter') {
+						joining ? handleJoinOnClick() : handleCreateOnClick();
+					}
+				}}
 			/>
 			{joining && (
 				<InputField
@@ -93,6 +103,9 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 					value={roomIDInput}
 					refValue={roomIDInputRef}
 					setValue={setRoomIDInput}
+					onKeyDown={e => {
+						if (e.key === 'Enter') handleJoinOnClick();
+					}}
 				/>
 			)}
 			{joining || (

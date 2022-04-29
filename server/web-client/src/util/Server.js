@@ -20,10 +20,24 @@ const GetNewRoomID = async () => {
 };
 
 // join server with room ID and username
-const JoinRoom = async (socket, roomID, username) => {
-	socket.emit('join-room', {
-		username,
-		roomID,
+const JoinRoom = (socket, roomID, username) => {
+	return new Promise((resolve, reject) => {
+		socket.emit('join-room', {
+			username,
+			roomID,
+		});
+		// if the server takes too long to respond, then reject
+		setTimeout(() => {
+			reject('server took too long to respond.');
+		}, 7777);
+		// if the server sends back a room does not exist prompt, then reject
+		socket.on('room-does-not-exist', () => {
+			reject(`room #${roomID} does not exist`);
+		});
+		// if the server sends back a room exists prompt, then resolve
+		socket.on('room-joined', () => {
+			resolve('room successfully joined');
+		});
 	});
 };
 
