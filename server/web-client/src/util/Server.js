@@ -32,11 +32,11 @@ const JoinRoom = (socket, roomID, username) => {
 		}, 7777);
 		// if the server sends back a room does not exist prompt, then reject
 		socket.on('room-does-not-exist', () => {
-			reject(`room #${roomID} does not exist`);
+			reject(`room #${roomID} does not exist.`);
 		});
 		// if the server sends back a room exists prompt, then resolve
 		socket.on('room-joined', () => {
-			resolve('room successfully joined');
+			resolve('room successfully joined.');
 		});
 	});
 };

@@ -48,7 +48,7 @@ io.on('connection', socket => {
 
 		// check if the room exists or not
 		if (!rooms.getRoom(roomID)) {
-			console.log('room does not exist');
+			console.log(`room #${roomID} does not exist`);
 			socket.emit('room-does-not-exist');
 			return;
 		}
