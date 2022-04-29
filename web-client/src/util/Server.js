@@ -6,9 +6,12 @@ const getTimeStamp = () =>
 // get the server URL, which is hosted at same link just PORT 5500
 // need to change this to accomodate dev and prod environments and pick the URL accordingly
 const getServerURL = () => {
+	// if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
 	const x = window.location.href.split(':');
 	x[x.length - 1] = '5500';
 	return x.join(':');
+	// }
+	// return 'https://pingx.vercel.app';
 };
 
 // get room ID from server
@@ -31,11 +34,11 @@ const JoinRoom = (socket, roomID, username) => {
 			reject('server took too long to respond.');
 		}, 7777);
 		// if the server sends back a room does not exist prompt, then reject
-		socket.on('room-does-not-exist', () => {
-			reject(`room #${roomID} does not exist.`);
+		socket.on('room-join-failure', data => {
+			reject(data);
 		});
 		// if the server sends back a room exists prompt, then resolve
-		socket.on('room-joined', () => {
+		socket.on('room-join-success', () => {
 			resolve('room successfully joined.');
 		});
 	});

@@ -17,7 +17,7 @@ class Rooms {
 	}
 
 	getRoom(roomID) {
-		return this.rooms.find(room => room.roomID === roomID);
+		return this.rooms.find(room => room.getRoomID() === roomID);
 	}
 }
 
