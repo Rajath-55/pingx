@@ -8,12 +8,7 @@ class Room {
 
 	// First confirm if the username doesn't already exist in the room. If it does, return false. Otherwise, add user to the room and return true.
 	addUser(username) {
-		let ok = true;
-
-		this.users.every(user => {
-			if (user.username === username) ok = false;
-			return ok;
-		});
+		const ok = this.users.every(user => user.username !== username);
 		if (ok) this.users.push(new User(username, this.roomID));
 
 		return ok;
@@ -23,6 +18,7 @@ class Room {
 	removeUser(username) {
 		const L = this.users.length;
 		this.users.filter(user => user.name !== username);
+
 		return this.users.length !== L;
 	}
 
