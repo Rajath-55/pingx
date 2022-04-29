@@ -25,7 +25,7 @@ const io = new Server(server, {
 app.use(cors());
 
 // setting the static build folder
-app.use(express.static('web-client/build/'));
+app.use(express.static('public'));
 
 const rooms = new Rooms();
 
