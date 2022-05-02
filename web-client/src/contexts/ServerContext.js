@@ -1,6 +1,7 @@
 import React, { useState, createContext } from 'react';
+import io from 'socket.io-client';
 
-import { getTimeStamp } from '../util/Server.js';
+import { getTimeStamp, CloseSocket, getServerURL } from '../util/Server.js';
 
 const ServerContext = createContext();
 
@@ -18,6 +19,10 @@ const ServerProvider = ({ children }) => {
 	const [usersOnline, setUsersOnline] = useState(0);
 
 	const resetAll = () => {
+		socket && CloseSocket(socket);
+		const newSocket = io(getServerURL());
+		setSocket(newSocket);
+
 		setUsername('');
 		setRoomID('');
 		setMessages([
