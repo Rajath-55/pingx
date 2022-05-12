@@ -86,6 +86,9 @@ io.on('connection', socket => {
 		});
 
 		socket.on('disconnect', () => {
+			console.log(
+				`${username} has disconnected from the room ${roomID}.`,
+			);
 			socket.to(roomID).emit('receive-message', {
 				username: 'SERVER',
 				message: `${username} has left the room.`,
