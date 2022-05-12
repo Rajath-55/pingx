@@ -38,8 +38,7 @@ export default function WelcomeScreen({ toggleLoading, showError, setMode }) {
 		// If no clash, just switch to the /chat route and join the room
 		toggleLoading(true);
 		setUsername(usernameInput);
-		roomIDInput = roomIDInput.toLowerCase();
-		setRoomID(roomIDInput);
+		setRoomID(roomIDInput.toLowerCase());
 
 		try {
 			await JoinRoom(socket, roomIDInput, usernameInput);
