@@ -69,7 +69,9 @@ io.on('connection', socket => {
 		rooms.getRoom(roomID).addUser(username);
 		socket.join(roomID);
 		socket.emit('room-join-success');
+		socket.emit('room-update', rooms.getRoom(roomID).viewUsers());
 
+		// updating the rest of the room about the new joinee
 		console.log(`${username} has joined the room ${roomID}`);
 		const dt = {
 			username: 'SERVER',
@@ -77,6 +79,9 @@ io.on('connection', socket => {
 			timeStamp: getTimeStamp(),
 		};
 		socket.to(roomID).emit('receive-message', dt);
+		socket
+			.to(roomID)
+			.emit('room-update', rooms.getRoom(roomID).viewUsers());
 
 		socket.on('send-message', data => {
 			socket.to(roomID).emit('receive-message', data);
@@ -95,6 +100,9 @@ io.on('connection', socket => {
 				timeStamp: getTimeStamp(),
 			});
 			rooms.getRoom(roomID).removeUser(username);
+			socket
+				.to(roomID)
+				.emit('room-update', rooms.getRoom(roomID).viewUsers());
 			rooms.checkRoomNotEmpty(roomID);
 			socket.leave(roomID);
 		});
