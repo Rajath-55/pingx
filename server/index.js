@@ -94,6 +94,8 @@ io.on('connection', socket => {
 				message: `${username} has left the room.`,
 				timeStamp: getTimeStamp(),
 			});
+			rooms.getRoom(roomID).removeUser(username);
+			rooms.checkRoomNotEmpty(roomID);
 			socket.leave(roomID);
 		});
 	});
