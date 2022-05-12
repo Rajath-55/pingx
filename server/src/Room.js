@@ -18,13 +18,17 @@ class Room {
 	// Remove user from the room. If the user wasnt in the room anyway, then return false. Otherwise, return true.
 	removeUser(username) {
 		const L = this.users.length;
-		this.users.filter(user => user.username !== username);
+		this.users = this.users.filter(user => user.username !== username);
 
 		return this.users.length !== L;
 	}
 
 	viewUsers() {
 		return this.users.map(user => user.username);
+	}
+
+	isEmpty() {
+		return this.users.length === 0;
 	}
 
 	getRoomID() {

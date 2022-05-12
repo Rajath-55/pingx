@@ -38,6 +38,7 @@ function App() {
 
 	// as the socket is obtained, set up a callback to close the socket when the app closes
 	useEffect(() => {
+		document.title = 'pingx';
 		return () => {
 			CloseSocket(socket);
 		};

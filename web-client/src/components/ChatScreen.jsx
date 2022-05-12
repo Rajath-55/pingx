@@ -3,15 +3,17 @@ import React, { useContext, useEffect } from 'react';
 import Messages from './Messages.jsx';
 import ChatHeader from './ChatHeader';
 import MessageInput from './MessageInput.jsx';
-import { ReceiveMessage } from '../util/Server.js';
+import { ReceiveMessage, UpdateUsersOnline } from '../util/Server.js';
 import { ServerContext } from '../contexts/ServerContext.js';
 
 export default function ChatScreen({ showError, toggleLoading, setMode }) {
-	const { socket, messages, setMessages } = useContext(ServerContext);
+	const { socket, messages, setMessages, usersOnline, setUsersOnline } =
+		useContext(ServerContext);
 
 	// registering the callback to receive messages from the server
 	useEffect(() => {
 		ReceiveMessage(socket, messages, setMessages);
+		UpdateUsersOnline(socket, usersOnline, setUsersOnline);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
