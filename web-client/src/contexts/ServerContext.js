@@ -16,7 +16,7 @@ const ServerProvider = ({ children }) => {
 			timeStamp: getTimeStamp(),
 		},
 	]);
-	const [usersOnline, setUsersOnline] = useState(0);
+	const [usersOnline, setUsersOnline] = useState([]);
 
 	const resetAll = () => {
 		socket && CloseSocket(socket);
@@ -32,7 +32,7 @@ const ServerProvider = ({ children }) => {
 				timeStamp: getTimeStamp(),
 			},
 		]);
-		setUsersOnline(0);
+		setUsersOnline([]);
 	};
 
 	return (

@@ -73,7 +73,7 @@ const ReceiveMessage = (socket, messages, setMessages) => {
 // update users online
 const UpdateUsersOnline = (socket, usersOnline, setUsersOnline) => {
 	socket.on('room-update', data => {
-		setUsersOnline(data.length);
+		setUsersOnline(data);
 	});
 };
 
