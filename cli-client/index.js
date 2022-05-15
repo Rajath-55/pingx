@@ -24,14 +24,14 @@ title.start();
 const sleep = (ms = 2000) => new Promise(r => setTimeout(r, ms));
 
 socket.on('connect', async () => {
-	await sleep();
+	// await sleep();
 	title.stop();
 
 	const welcome = chalkAnimation.rainbow(
 		'================connected to server================',
 	);
 	welcome.start();
-	await sleep();
+	await sleep(1000);
 	welcome.stop();
 
 	if (!username) {
@@ -75,8 +75,12 @@ socket.on('connect', async () => {
 	});
 
 	socket.on('receive-message', msg => {
-		console.log(
-			`\n${chalk.yellow(msg.username)}: ${chalk.cyan(msg.message)}`,
+		process.stdout.clearLine();
+		process.stdout.cursorTo(0);
+		console.info(
+			`${chalk.green('>')} ${chalk.magenta(msg.username)}: ${chalk.cyan(
+				msg.message,
+			)}`,
 		);
 	});
 
