@@ -1,7 +1,7 @@
 const CloseSocket = socket => socket.close();
 
 const getTimeStamp = () =>
-	`${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+	`${new Date().getHours()}:${new Date().getMinutes()}`;
 
 // get the server URL, which is hosted at same link just PORT 5500
 // need to change this to accomodate dev and prod environments and pick the URL accordingly
@@ -51,7 +51,7 @@ const sendMessage = (socket, username, message, messages, setMessages) => {
 	const data = {
 		username,
 		message,
-		timeStamp: getTimeStamp(),
+		timeStamp: new Date(),
 	};
 	newMessages.push(data);
 	setMessages(newMessages);

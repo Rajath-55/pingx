@@ -4,31 +4,25 @@ import { ServerContext } from '../contexts/ServerContext.js';
 import OtherMessage from './OtherMessage.jsx';
 import SelfMessage from './SelfMessage.jsx';
 import ServerMessage from './ServerMessage.jsx';
+import { getTimeStamp } from '../util/Server.js';
 
 export default function Message({ username, message, timeStamp }) {
 	const ctx = useContext(ServerContext);
+	const ts = getTimeStamp(timeStamp);
 
 	if (username === ctx.username)
 		return (
-			<SelfMessage
-				username={username}
-				message={message}
-				timeStamp={timeStamp}
-			/>
+			<SelfMessage username={username} message={message} timeStamp={ts} />
 		);
 	if (username === 'SERVER')
 		return (
 			<ServerMessage
 				username={username}
 				message={message}
-				timeStamp={timeStamp}
+				timeStamp={ts}
 			/>
 		);
 	return (
-		<OtherMessage
-			username={username}
-			message={message}
-			timeStamp={timeStamp}
-		/>
+		<OtherMessage username={username} message={message} timeStamp={ts} />
 	);
 }

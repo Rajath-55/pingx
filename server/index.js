@@ -39,8 +39,7 @@ app.get('/create', (req, res) => {
 	res.send({ roomID: ID });
 });
 
-const getTimeStamp = () =>
-	`${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+const getTimeStamp = d => `${d.getHours()}:${d.getMinutes()}`;
 
 // setting the socket handlers
 io.on('connection', socket => {
@@ -76,7 +75,7 @@ io.on('connection', socket => {
 		const dt = {
 			username: 'SERVER',
 			message: `${username} has joined the room.`,
-			timeStamp: getTimeStamp(),
+			timeStamp: new Date(),
 		};
 		socket.to(roomID).emit('receive-message', dt);
 		socket
@@ -84,9 +83,12 @@ io.on('connection', socket => {
 			.emit('room-update', rooms.getRoom(roomID).viewUsers());
 
 		socket.on('send-message', data => {
+			data.timeStamp = new Date();
 			socket.to(roomID).emit('receive-message', data);
 			console.log(
-				`${roomID}\n\t| ${data.timeStamp} | ${data.username}: ${data.message}`,
+				`${roomID}\n\t| ${getTimeStamp(data.timeStamp)} | ${
+					data.username
+				}: ${data.message}`,
 			);
 		});
 
@@ -97,7 +99,7 @@ io.on('connection', socket => {
 			socket.to(roomID).emit('receive-message', {
 				username: 'SERVER',
 				message: `${username} has left the room.`,
-				timeStamp: getTimeStamp(),
+				timeStamp: new Date(),
 			});
 			rooms.getRoom(roomID).removeUser(username);
 			socket
