@@ -52,9 +52,13 @@ socket.on('connect', async () => {
 	const joining = ans2.joining;
 
 	if (joining === 'create room') {
+		const creating = chalkAnimation.karaoke('creating new room');
+		creating.start();
 		roomID = await axios
 			.get(`${serverURL}/create`)
 			.then(res => res.data.roomID);
+		creating.stop();
+		console.log(chalk.green(`room #${roomID} created`));
 	} else {
 		const ans3 = await inquirer.prompt({
 			name: 'roomID',
@@ -67,7 +71,7 @@ socket.on('connect', async () => {
 	socket.emit('join-room', { username, roomID });
 
 	socket.on('room-join-success', () => {
-		console.log(chalk.green('joined room successfully'));
+		console.log(chalk.green(`joined room #${roomID} successfully`));
 	});
 	socket.on('room-join-failure', msg => {
 		console.log(chalk.red("couldn't join room:", msg));
@@ -77,10 +81,12 @@ socket.on('connect', async () => {
 	socket.on('receive-message', msg => {
 		process.stdout.clearLine();
 		process.stdout.cursorTo(0);
+		const u = msg.username === 'SERVER' ? chalk.magentaBright : chalk.cyan;
+
 		console.info(
-			`${chalk.green('>')} ${chalk.magenta(msg.username)}: ${chalk.cyan(
+			`${chalk.green('>')} ${chalk.magenta(msg.username)}: ${u(
 				msg.message,
-			)}`,
+			)}\t\t\t\t${msg.timeStamp}`,
 		);
 	});
 
@@ -109,14 +115,12 @@ socket.on('connect', async () => {
 					);
 					break;
 				default:
-					console.log(chalk.red(`${cmd} is not a valid command`));
+					socket.emit('send-message', {
+						message: ans.message,
+						username,
+						timeStamp: `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
+					});
 			}
 		}
-
-		socket.emit('send-message', {
-			message: ans.message,
-			username,
-			timeStamp: `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
-		});
 	}
 });
