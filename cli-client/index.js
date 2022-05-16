@@ -12,10 +12,9 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const serverURL =
-	// process.env.NODE_ENV === 'development'
-	// ? 'http://localhost:5500'
-	// :
-	'https://pingx-server.herokuapp.com';
+	process.env.NODE_ENV === 'development'
+		? 'http://localhost:5500'
+		: 'https://pingx-server.herokuapp.com';
 
 const socket = io(serverURL);
 let username, roomID;
@@ -115,12 +114,13 @@ socket.on('connect', async () => {
 					);
 					break;
 				default:
-					socket.emit('send-message', {
-						message: ans.message,
-						username,
-						timeStamp: `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
-					});
+					console.log(chalk.red(`${cmd} is not a valid command`));
 			}
-		}
+		} else
+			socket.emit('send-message', {
+				message: ans.message,
+				username,
+				timeStamp: `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
+			});
 	}
 });
