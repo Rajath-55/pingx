@@ -8,18 +8,17 @@ from rich.panel import Panel
 import os
 from console import console
 from pick import pick
-import threading
 import aioconsole
 import sys
 from rich.layout import Layout
-from rich.prompt import Prompt
+# from rich.prompt import Prompt
 
 
 
 #socketio client
 sio = socketio.AsyncClient()
 SERVER_URL = 'https://pingx-server.herokuapp.com'
-global username
+
 
 
 
@@ -60,16 +59,17 @@ async def send_message(message, username):
     time_stamp = get_timestamp()
     print("\033[A", end="")
     pprint("[bold green]you: [/]" + message + " ", end="")
-
-    
     console.print("[red]-[/] " + time_stamp)
     await sio.emit('send-message', {'username' :username, 'message': message, 'timeStamp' : time_stamp})
 
 
 @sio.on('receive-message')
 async def recieve_message(message):
-    console.print('\n' + message['username'] + ": [cyan]" + message['message'] + "[/] [red]-[/] " + convert_time(message['timeStamp']))
-
+    sys.stdout.write('\033[2K\033[1G')
+    console.print('[green]' + message['username'] + ":[/] [cyan]" + message['message'] + "[/] [red]-[/] " + convert_time(message['timeStamp']))
+    # await get_input(user)
+    pprint("[bold green]you: [/]", end="")
+    
 
 @sio.on('room-update')
 async def update_members(data):
@@ -90,7 +90,10 @@ def connect_error(data):
 async def disconnect():
     console.print(Panel('[red bold] Disconnected from server'), justify = 'center')
 
+
 async def get_input(username):
+    global user
+    user = username
     while True:
         pprint("[bold green]you: [/]", end="")
         message = await aioconsole.ainput("")
