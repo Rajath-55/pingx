@@ -1,4 +1,11 @@
 python-socketio[asyncio_client]
 pyfiglet
 requests
-textual
+# textual
+typer[all]
+rich
+pick
+python-dateutil
+pytz
+tzlocal
+aioconsole

@@ -3,23 +3,32 @@ import socketio
 import requests
 import json
 from utils import *
-from ascii import *
-import pprint
+from rich import print as pprint
+from rich.panel import Panel
 import os
+from console import console
+from pick import pick
+import threading
+import aioconsole
+import sys
+from rich.layout import Layout
+from rich.prompt import Prompt
+
+
+
 #socketio client
 sio = socketio.AsyncClient()
 SERVER_URL = 'https://pingx-server.herokuapp.com'
+global username
 
-def get_username():
-    with open('config.json', 'r') as f:
-        data = json.load(f)
-        return data['username']
+
 
 
 @sio.event
 async def connect():
-    print('connection established')
+    console.rule("[bold red]Connected to server[/]")
 
+    
 
 
 @sio.event
@@ -30,54 +39,133 @@ async def join(username = None, roomID = None):
         room_id = roomID
     if not username:
         username = "user"
-    await sio.emit('join-room', {'username' : username, 'roomID': room_id})
-    print("Joined room: " + room_id)
+    ok = await sio.emit('join-room', {'username' : username, 'roomID': room_id})
+    if ok is None:
+        console.print("[red]Room with ID #" + room_id +" does not exist![/]")
+        await sio.disconnect()
+        sys.exit()
     
+
+    console.print("[green] Joined room: " + room_id)
+    # console.print("[green]Current user count: [/]" + current_users)
+
+    
+
 
 
 @sio.event 
 async def send_message(message, username):
-    print(message)
-    await sio.emit('send-message', {'username' :username, 'message': message, 'timeStamp' : get_timestamp()})
+    # console.print("[bold gray]:message: you: [/] " + "[bold]" + message + "[/]")
+    time_stamp = get_timestamp()
+    print("\033[A", end="")
+    pprint("[bold green]you: [/]" + message + " ", end="")
+
+    
+    console.print("[red]-[/] " + time_stamp)
+    await sio.emit('send-message', {'username' :username, 'message': message, 'timeStamp' : time_stamp})
 
 
 @sio.on('receive-message')
 async def recieve_message(message):
-    print(message['username'] + ": " + message['message'] + " at " + message['timeStamp'])
+    console.print('\n' + message['username'] + ": [cyan]" + message['message'] + "[/] [red]-[/] " + convert_time(message['timeStamp']))
 
-@sio.on('*')
-async def catch_all(event, data):
-   pass
+
+@sio.on('room-update')
+async def update_members(data):
+    pass
+    # global current_users
+    # current_users = data
+    # console.print("Current user count: " + str(len(data)))
+
+
 
 @sio.event
 def connect_error(data):
-    print("The connection failed!")
+    console.print("The connection failed!")
 
 
 
 @sio.event
 async def disconnect():
-    print('disconnected from server')
+    console.print(Panel('[red bold] Disconnected from server'), justify = 'center')
 
-async def main():
-    print(convert_ascii("                    pingx                   "))
-    pprint.pp("Command cline chat app")
-    if not os.path.exists('./config.json'):
-        print("Enter your username: ")
-        username = input()
-        with open('config.json', 'w') as f:
-            json.dump({'username': username, 'avatar' : 'idkbahi', 'ascii-avatar?' : 'lesee'}, f)
+async def get_input(username):
+    while True:
+        pprint("[bold green]you: [/]", end="")
+        message = await aioconsole.ainput("")
+        if message == "!!quit":
+            await sio.disconnect()
+            console.print("[red]Disconnected from server[/], [bold]Goodbye![/]")
+            sys.exit()   
+            
+        await send_message(message, username)
+        await get_input(username)
+
+
+#TODO try to make layouts and independent input scheme
+def make_layout() -> Layout:
+    layout = Layout()
+    layout.split_column(
+    Layout(name="chat_window", ratio=4),
+    Layout(name="type_window"))
+    layout["type_window"].split_row(Layout(name="users_list"), Layout(name="input_window", ratio = 4))
+    pprint(layout)
+    return layout
+
+#registers the user (makes the config file for now) and returns the username
+def register_user(user_name):
+    if not os.path.exists('./.pingxconfig'):
+        os.mkdir('./.pingxconfig')
+    if not os.path.exists('./.pingxconfig/' + user_name + '_config.json'):
+        with open('./.pingxconfig/' + user_name + '_config.json', 'w') as f:
+            json.dump({'username': user_name, 'avatar' : 'idkbahi', 'ascii-avatar' : 'tbd', 'theme' : 'sql hehe'}, f)
+    return user_name
+
+async def create_room(room_id:str):
+    #create command
+    if room_id is not None:
+        await sio.connect(SERVER_URL)
+        await sio.emit('join-room', {'username' : 'inp_user', 'roomID': room_id})
+        console.print(Panel("[bold yellow underline]Created room " + room_id), justify="center")
+        await sio.disconnect()
+        sys.exit()
+
+async def main(inp_user = None, room_id = None):
+    if inp_user is None:
+        inp_user = 'user'
+    
+    console.print(convert_ascii("pingx"), justify="center", style="cyan")
+    console.print("[cyan]The command line chat app", justify='center')
+    console.print(Panel("[magenta]Created by: [bold red]@pingx team[/]"), justify='center')
+    console.print("[cyan]Type !!quit to exit[/]")
+
+    # console.print("[green]Connecting to server...[/]")
+    if inp_user is not None:
+        username = register_user(inp_user)
     else:
-        username = get_username()
-    print("Connecting to server...")
+        username = 'user'
+
+    console.print("[yellow]Connecting to server...", justify='center')
     await sio.connect(SERVER_URL)
-    await join(username)
-    await asyncio.sleep(5)
-    for _ in range(10):
-        await send_message( "Message #" + str(_) + " from client",username=username,)
-        await asyncio.sleep(1)
-  
+
+    if room_id is None:
+        title = 'Do you want to create a new room or join an existing one?'
+        options = ['Join a room', 'Create a room']
+        option, index = pick(options, title, indicator='➡️ ', default_index=0)
+        console.print("[green]" + option, justify='center')
+        if option == 'Join a room':
+            console.print("Enter the room ID: ")
+            roomID = input()
+            await join(username,roomID)
+        elif option == 'Create a room':
+            await join(username)
+    else:
+        await join(username, room_id)
+    
+    await get_input(inp_user)
+
     await sio.wait()
+
 
 
 def get_room_id():
