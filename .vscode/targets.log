@@ -10,7 +10,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 make: *** No rule to make target `all'.  Stop.
 
 
-# Make data base, printed on Tue May 17 11:53:44 2022
+# Make data base, printed on Tue May 17 15:19:05 2022
 
 # Variables
 
@@ -47,7 +47,7 @@ __CFBundleIdentifier = com.microsoft.VSCode
 # environment
 P9K_SSH = 0
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/3m/621vw7l56z92r9r6g8x348ym0000gn/T/vscode-ipc-1277f5ca-f63f-44ac-b661-d8cf7cd4f1dd.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/3m/621vw7l56z92r9r6g8x348ym0000gn/T/vscode-ipc-29c986f5-5ae2-495b-a130-e72a0757db51.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -169,7 +169,7 @@ MAKELEVEL := 0
 # environment
 CONDA_PREFIX = /opt/homebrew/Caskroom/miniforge/base
 # environment
-VSCODE_PID = 72775
+VSCODE_PID = 87612
 # environment
 _CE_CONDA = 
 # environment
@@ -257,6 +257,6 @@ GNUmakefile:
 # strcache size: total = 0 / max = 0 / min = 4096 / avg = 0
 # strcache free: total = 0 / max = 0 / min = 4096 / avg = 0
 
-# Finished Make data base on Tue May 17 11:53:44 2022
+# Finished Make data base on Tue May 17 15:19:05 2022
 
  
