@@ -29,6 +29,12 @@ async def connect():
     console.rule("[bold red]Connected to server[/]")
 
     
+@sio.on('room-join-failure')
+async def check_room(data):
+    console.print("[red]" + data + "[/]")
+    await sio.disconnect()
+    sys.exit()
+
 
 
 @sio.event
@@ -40,11 +46,6 @@ async def join(username = None, roomID = None):
     if not username:
         username = "user"
     ok = await sio.emit('join-room', {'username' : username, 'roomID': room_id})
-    if ok is None:
-        console.print("[red]Room with ID #" + room_id +" does not exist![/]")
-        await sio.disconnect()
-        sys.exit()
-    
 
     console.print("[green] Joined room: " + room_id)
     # console.print("[green]Current user count: [/]" + current_users)
@@ -122,7 +123,7 @@ def register_user(user_name):
     return user_name
 
 async def create_room(room_id:str):
-    #create command
+    #create command not working rn
     if room_id is not None:
         await sio.connect(SERVER_URL)
         await sio.emit('join-room', {'username' : 'inp_user', 'roomID': room_id})
