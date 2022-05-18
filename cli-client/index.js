@@ -12,9 +12,10 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const serverURL =
-	process.env.NODE_ENV === 'development'
-		? 'http://localhost:5500'
-		: 'https://pingx-server.herokuapp.com';
+	// process.env.NODE_ENV === 'development'
+	// 	? 'http://localhost:5500'
+	// :
+	'https://pingx-server.herokuapp.com';
 
 const socket = io(serverURL);
 let username, roomID;
@@ -30,7 +31,7 @@ socket.on('connect', async () => {
 		'================connected to server================',
 	);
 	welcome.start();
-	await sleep(1000);
+	await sleep(777);
 	welcome.stop();
 
 	if (!username) {
@@ -73,6 +74,7 @@ socket.on('connect', async () => {
 		console.log(chalk.green(`joined room #${roomID} successfully`));
 	});
 	socket.on('room-join-failure', msg => {
+		process.stdout.clearLine();
 		console.log(chalk.red("couldn't join room:", msg));
 		process.exit(1);
 	});
@@ -106,6 +108,8 @@ socket.on('connect', async () => {
 				case 'clear':
 					console.clear();
 					break;
+				case 'return':
+
 				case 'help':
 					console.log(
 						`${chalk.yellow('!exit')} - exits the program\n` +
@@ -114,7 +118,9 @@ socket.on('connect', async () => {
 					);
 					break;
 				default:
-					console.log(chalk.red(`${cmd} is not a valid command`));
+					console.log(
+						'Error : ' + chalk.red(`${cmd} is not a valid command`),
+					);
 			}
 		} else
 			socket.emit('send-message', {
