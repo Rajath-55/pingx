@@ -5,35 +5,42 @@ import gradient from 'gradient-string';
 import chalkAnimation from 'chalk-animation';
 import { createSpinner } from 'nanospinner';
 import axios from 'axios';
-
 import dotenv from 'dotenv';
+import ON_DEATH from 'death';
+
+import { sleep, serverURL } from './src/utils.js';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
-const serverURL =
-	// process.env.NODE_ENV === 'development'
-	// 	? 'http://localhost:5500'
-	// :
-	'https://pingx-server.herokuapp.com';
-
 const socket = io(serverURL);
-let username, roomID;
+
+let username = '',
+	roomID = '';
+let users = [];
+let joiningMode = 'join room';
+
+// currently doesn't work in Git Bash in Windows.
+ON_DEATH(() => {
+	console.log(chalk.bgGreen('goodbye'));
+	socket.disconnect();
+});
+
 const title = chalkAnimation.glitch('\t\t\tpingx');
 title.start();
-const sleep = (ms = 2000) => new Promise(r => setTimeout(r, ms));
 
-socket.on('connect', async () => {
-	// await sleep();
+const showWelcomeAnimation = async () => {
 	title.stop();
-
+	process.stdout.clearLine();
+	// console.log(chalk.whiteBright('\t\t\tpingx'));
 	const welcome = chalkAnimation.rainbow(
 		'================connected to server================',
 	);
 	welcome.start();
 	await sleep(777);
 	welcome.stop();
+};
 
+const askUsername = async () => {
 	if (!username) {
 		const ans = await inquirer.prompt({
 			name: 'username',
@@ -42,16 +49,20 @@ socket.on('connect', async () => {
 		});
 		username = ans.username;
 	}
+};
 
+const askJoiningMode = async () => {
 	const ans2 = await inquirer.prompt({
 		name: 'joining',
 		type: 'list',
 		message: '',
 		choices: ['create room', 'join room'],
 	});
-	const joining = ans2.joining;
+	joiningMode = ans2.joining;
+};
 
-	if (joining === 'create room') {
+const askRoomID = async () => {
+	if (joiningMode === 'create room') {
 		const creating = chalkAnimation.karaoke('creating new room');
 		creating.start();
 		roomID = await axios
@@ -67,30 +78,114 @@ socket.on('connect', async () => {
 		});
 		roomID = ans3.roomID;
 	}
+};
 
-	socket.emit('join-room', { username, roomID });
+const joinRoom = () => {
+	return new Promise((resolve, reject) => {
+		socket.emit('join-room', { username, roomID });
+		setTimeout(() => {
+			reject();
+		}, 5000);
+		socket.on('room-join-success', () => {
+			console.log(chalk.green(`joined room #${roomID} successfully`));
 
-	socket.on('room-join-success', () => {
-		console.log(chalk.green(`joined room #${roomID} successfully`));
+			// currently having to turn off these event listeners manually to prevent the listeners from getting compounded after every recursive call.
+			//TODO: figure out a better way to handle this issue.
+			socket.off('room-join-success');
+			socket.off('room-join-failure');
+
+			resolve();
+		});
+		socket.on('room-join-failure', msg => {
+			process.stdout.clearLine();
+			process.stdout.cursorTo(0);
+			console.log(chalk.red("couldn't join room:", msg));
+
+			socket.off('room-join-success');
+			socket.off('room-join-failure');
+
+			reject();
+		});
 	});
-	socket.on('room-join-failure', msg => {
-		process.stdout.clearLine();
-		console.log(chalk.red("couldn't join room:", msg));
-		process.exit(1);
-	});
+};
 
+const sendMessage = msg => {
+	socket.emit('send-message', {
+		message: msg,
+		username,
+		timeStamp: new Date(),
+	});
+};
+
+const handleReceiveMessage = () => {
 	socket.on('receive-message', msg => {
 		process.stdout.clearLine();
 		process.stdout.cursorTo(0);
-		const u = msg.username === 'SERVER' ? chalk.magentaBright : chalk.cyan;
+		const u =
+			msg.username === 'SERVER' ? chalk.magentaBright : chalk.cyanBright;
 
 		console.info(
-			`${chalk.green('>')} ${chalk.magenta(msg.username)}: ${u(
+			`${chalk.green('>')} ${chalk.yellowBright(msg.username)}: ${u(
 				msg.message,
-			)}\t\t\t\t${msg.timeStamp}`,
+			)}`,
 		);
 	});
+};
 
+const handleRoomUpdate = () => {
+	socket.on('room-update', data => {
+		users = data;
+	});
+};
+
+const connectToRoom = async () => {
+	try {
+		await askRoomID();
+		await joinRoom();
+		handleReceiveMessage();
+		handleRoomUpdate();
+	} catch (e) {
+		console.log(chalk.bgGreen("let's try again"));
+		await connectToRoom();
+	}
+};
+
+const handleCommand = command => {
+	const cmd = command.split(' ')[0].slice(1);
+
+	switch (cmd) {
+		case 'exit':
+			process.exit(0);
+			break;
+		case 'clear':
+			console.clear();
+			break;
+		case 'users':
+			console.log(chalk.underline('users in room #' + roomID + ':'));
+			console.log(chalk.white(`\t> ${username} (you)`));
+			users.forEach(
+				u =>
+					u !== username &&
+					console.log(chalk.yellowBright(`\t> ${u}`)),
+			);
+			break;
+		case 'return':
+
+		case 'help':
+			console.log(
+				`${chalk.yellow('!exit')} - exits the program\n` +
+					`${chalk.yellow('!clear')} - clears the console\n` +
+					`${chalk.yellow('!help')} - prints this message`,
+			);
+			break;
+		default:
+			console.log(
+				'Error : ' + chalk.red(`${cmd} is not a valid command`),
+			);
+	}
+};
+
+const handleMessaging = async () => {
 	while (true) {
 		const ans = await inquirer.prompt({
 			name: 'message',
@@ -99,34 +194,19 @@ socket.on('connect', async () => {
 		});
 
 		if (ans.message.startsWith('!')) {
-			const cmd = ans.message.split(' ')[0].slice(1);
+			handleCommand(ans.message);
+			continue;
+		}
 
-			switch (cmd) {
-				case 'exit':
-					process.exit(0);
-					break;
-				case 'clear':
-					console.clear();
-					break;
-				case 'return':
-
-				case 'help':
-					console.log(
-						`${chalk.yellow('!exit')} - exits the program\n` +
-							`${chalk.yellow('!clear')} - clears the console\n` +
-							`${chalk.yellow('!help')} - prints this message`,
-					);
-					break;
-				default:
-					console.log(
-						'Error : ' + chalk.red(`${cmd} is not a valid command`),
-					);
-			}
-		} else
-			socket.emit('send-message', {
-				message: ans.message,
-				username,
-				timeStamp: `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
-			});
+		sendMessage(ans.message);
 	}
+};
+
+socket.on('connect', async () => {
+	await showWelcomeAnimation();
+	await askUsername();
+	await askJoiningMode();
+	await connectToRoom();
+
+	await handleMessaging();
 });
