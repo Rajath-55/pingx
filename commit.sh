@@ -47,6 +47,24 @@ update() {
 	push
 }
 
+server() {
+	cd server/
+	npm run dev
+	cd ../
+}
+
+web() {
+	cd web-client/
+	yarn start
+	cd ../
+}
+
+cli() {
+	cd node-cli-client/
+	npm run start
+	cd ../
+}
+
 case "$1" in
     "") ;;
     build_client) "$@"; exit;;
@@ -55,5 +73,8 @@ case "$1" in
     heroku_commit) "$@"; exit;;
     heroku_push) "$@"; exit;;
     update) "$@"; exit;;
+	server) "$@"; exit;;
+	web) "$@"; exit;;
+	cli) "$@"; exit;;
     *) log_error "Unkown function: $1()"; exit 2;;
 esac
